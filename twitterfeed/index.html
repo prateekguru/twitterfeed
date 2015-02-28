@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Twitter Timeline - @prateekgupta76</title>
+</head>
+<body>
+    <h1>Feed Hub</h1>
+    <div id="container">
+
+    </div>
+    <script src="./Scripts/jquery-2.1.3.min.js"></script>
+    <script src="./Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="./signalr/hubs"></script>
+
+    <script>
+        $(function () {
+
+            var sotwInit = false;
+            var feedHub = $.connection.twitterFeedHub;
+
+            $.connection.hub.logging = true;
+            $.connection.hub
+                .start()
+                .done(function () {
+
+                    feedHub.server.readyStateStatus()
+                        .done(function (state) {
+                            if (state) { // if server is ready with state and has tweets, then get sotw
+                                console.log("Ready State Status is " + state);
+                                feedHub.server
+                                    .stateOfTheWorld()
+                                    .done(function (tweets) {
+                                        sotwInit = true;
+                                        console.log("sotwInit " + sotwInit);
+                                        $("#container").empty();
+                                        $.each(tweets, function () {
+                                            console.log("tweet received #1");
+                                            var tweet = this;
+                                            $("#container").append(tweet);
+                                        });
+                                    });
+                            }
+                        });
+
+                });
+
+            feedHub.client.updateReadyState = function (state) {
+                console.log("sotwInit " + sotwInit + " & updateReadyState is " + state);
+                if (state && (!sotwInit)) { // state is now ready
+                    feedHub.server
+                        .stateOfTheWorld()
+                        .done(function (tweets) {
+                            sotwInit = true;
+                            $("#container").empty();
+                            $.each(tweets, function () {
+                                console.log("tweet received #2");
+                                var tweet = this;
+                                $("#container").append(tweet);
+                            });
+                        });
+                }
+            }
+
+            feedHub.client.updateTweet = function (tweet) {
+                console.log("tweet received #3");
+                $("#container").append(tweet);
+            }
+        });
+
+    </script>
+</body>
+</html>

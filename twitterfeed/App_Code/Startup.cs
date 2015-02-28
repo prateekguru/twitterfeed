@@ -1,5 +1,8 @@
-﻿using Owin;
+﻿using Microsoft.Owin;
+using Owin;
+using twitterfeed;
 
+[assembly: OwinStartup(typeof(twitterfeed.Startup))]
 namespace twitterfeed
 {
     public class Startup
