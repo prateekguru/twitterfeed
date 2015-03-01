@@ -49,14 +49,20 @@ namespace twitterfeed.Services
                 f =>
                 {
                     var statusCollection = f.ResponseObject;
-                    foreach (var twitterStatus in statusCollection.Where(twitterStatus => _tweets.TryAdd(twitterStatus.StringId, twitterStatus)))
+                    if (statusCollection != null)
                     {
-                        if (state != null)
+                        foreach (var twitterStatus in statusCollection)
                         {
-                            // called from timer, so need to broadcast the update to clients
-                            Clients.All.updateTweet(twitterStatus);
+                            if (_tweets.TryAdd(twitterStatus.StringId, twitterStatus))
+                            {
+                                if (state != null)
+                                {
+                                    // called from timer, so need to broadcast the update to clients
+                                    Clients.All.updateTweet(twitterStatus);
+                                }
+                                LastTweetId = twitterStatus.Id;
+                            }
                         }
-                        LastTweetId = twitterStatus.Id;
                     }
                     if (_timer == null)
                     {
