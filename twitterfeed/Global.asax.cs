@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Net;
 using System.Web;
+using System.Web.Http;
 using Twitterizer;
 
 namespace twitterfeed
@@ -21,6 +22,16 @@ namespace twitterfeed
             };
 
             Application.Add("AuthTokens", tokens);
+
+            GlobalConfiguration.Configure(config =>
+            {
+                config.MapHttpAttributeRoutes();
+                config.Routes.MapHttpRoute(
+                    name: "api",
+                    routeTemplate: "api/{controller}/{id}",
+                    defaults: new { id = RouteParameter.Optional }
+                    );
+            });
         }
 
         protected void Session_Start(object sender, EventArgs e)
